@@ -4,7 +4,10 @@ import { pickHTMLProps } from 'pick-react-known-prop';
 import { propsToOptions } from './ConfigUtils';
 
 /* tslint:disable-next-line */
+// import * as Tabulator_Import from 'tabulator-tables';
+// const { TabulatorFull: Tabulator } = Tabulator_Import;
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
+
 import { Tabulator as TabulatorTypes } from './types/TabulatorTypes';
 
 export interface ReactTabulatorOptions extends TabulatorTypes.Options {
@@ -23,7 +26,7 @@ export interface ReactTabulatorProps {
 
 const ReactTabulator = (props: ReactTabulatorProps) => {
   const ref = React.useRef();
-  const instanceRef = React.useRef();
+  const instanceRef: any = React.useRef();
   const [mainId, setMainId] = React.useState(`tabulator-${+new Date()}-${Math.floor(Math.random() * 9999999)}`);
 
   let htmlProps;
@@ -32,7 +35,7 @@ const ReactTabulator = (props: ReactTabulatorProps) => {
   delete htmlProps['columns'];
 
   const initTabulator = async () => {
-    const domEle: any = ReactDOM.findDOMNode(ref.current); // mounted DOM element
+    const domEle: any = ref.current; // Directly access the DOM element
     const { columns, data, options } = props;
     const propOptions = await propsToOptions(props);
     if (data) {
@@ -57,12 +60,19 @@ const ReactTabulator = (props: ReactTabulatorProps) => {
   React.useEffect(() => {
     // console.log('useEffect - onmount');
     initTabulator();
+
+    // Cleanup function to destroy Tabulator instance on unmount
+    return () => {
+      if (instanceRef.current) {
+        instanceRef.current.destroy();
+      }
+    };
   }, []);
 
   React.useEffect(() => {
     // console.log('useEffect - props.data changed');
-    if (instanceRef && instanceRef.current) {
-      initTabulator(); // re-init table
+    if (instanceRef?.current) {
+      initTabulator();
     }
   }, [props.data]);
 
